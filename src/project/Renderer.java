@@ -7,7 +7,6 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 
 import static org.lwjgl.opengl.GL11.*;
 
-
 //Angles: 0=right, 90=up, 180=left, 270=bottom
 public class Renderer extends AbstractRenderer {
 
@@ -19,7 +18,13 @@ public class Renderer extends AbstractRenderer {
     private float y2;
 
     private float length;
+    private int lengthDivisor;
+
     private RotationManager rotationManager;
+
+    private String axiom;
+    private String lSystem;
+    private int generationCount;
 
     public Renderer() {
         super(800, 800);
@@ -64,24 +69,55 @@ public class Renderer extends AbstractRenderer {
 
         setInitialStartingCoords();
 
-        stepAndDrawLine();
+        axiom = "F+F+F+F";
+        lengthDivisor = 5;
 
-        rotateLeft(90);
-        stepAndDrawLine();
+        generationCount = 2;
 
-        rotateLeft(90);
-        stepAndDrawLine();
+        lSystem = axiom;
+        convertCharsByRule();
 
-        rotateLeft(90);
-        stepAndDrawLine();
+        drawLSystem(90);
+    }
+
+    //todo: don't forget rules will be stored in a LIST
+    //todo: can try doing replaceAll but maybe it will cause problems
+    private void convertCharsByRule() {
+        Rule ruleOne = new Rule('F', "F+F-F-FF+F+F-F");
+        StringBuilder newLSystem = new StringBuilder();
+
+        for (int i = 0; i < generationCount; i++) {
+            for (int j = 0; j < lSystem.length(); j++) {
+                if (lSystem.charAt(j) == ruleOne.getCharToConvert()) {
+                    newLSystem.append(ruleOne.getConversion());
+                } else {
+                    newLSystem.append(lSystem.charAt(j));
+                }
+            }
+            lSystem = newLSystem.toString();
+            newLSystem = new StringBuilder();
+            divideLength();
+        }
     }
 
     private void setInitialStartingCoords() {
-        startingX = 0.7f;
-        startingY = -0.7f;
-        length = 1.4f;
-        rotationManager = new RotationManager(90);
+        startingX = 0.3f;
+        startingY = 0.3f;
+        length = 1f;
+        rotationManager = new RotationManager(270);
     }
+
+    private void drawLSystem(int angleToRotate) {
+        for (int i = 0; i < lSystem.length(); i++) {
+            switch (lSystem.charAt(i)) {
+                case 'F' -> stepAndDrawLine();
+                case 'f' -> step();
+                case '+' -> rotateRight(angleToRotate);
+                case '-' -> rotateLeft(angleToRotate);
+            }
+        }
+    }
+
 
     //F
     private void stepAndDrawLine() {
@@ -101,13 +137,17 @@ public class Renderer extends AbstractRenderer {
     }
 
     //+
+    private void rotateRight(int angle) {
+        rotationManager.setAngle((rotationManager.getAngle() + angle + 180) % 360);
+    }
+
+    //-
     private void rotateLeft(int angle) {
         rotationManager.setAngle((rotationManager.getAngle() + angle) % 360);
     }
 
-    //-
-    private void rotateRight(int angle) {
-        rotationManager.setAngle((rotationManager.getAngle() + angle + 180) % 360);
+    private void divideLength() {
+        length /= lengthDivisor;
     }
 
     private void drawLine() {
