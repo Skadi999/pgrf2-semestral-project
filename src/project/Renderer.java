@@ -19,7 +19,7 @@ public class Renderer extends AbstractRenderer {
     private float y2;
 
     private float length;
-    private int angle;
+    private RotationManager rotationManager;
 
     public Renderer() {
         super(800, 800);
@@ -80,7 +80,7 @@ public class Renderer extends AbstractRenderer {
         startingX = 0.7f;
         startingY = -0.7f;
         length = 1.4f;
-        angle = 90;
+        rotationManager = new RotationManager(90);
     }
 
     //F
@@ -91,18 +91,23 @@ public class Renderer extends AbstractRenderer {
 
     //f
     private void step() {
-        double angleToRadians = angle * (Math.PI / 180);
-
-        double cosTheta = Math.cos(angleToRadians);
-        double sinTheta = Math.sin(angleToRadians);
-
         x1 = startingX;
         y1 = startingY;
-        x2 = (float) (x1 + (cosTheta * length));
-        y2 = (float) (y1 + (sinTheta * length));
+        x2 = x1 + rotationManager.getCosTheta() * length;
+        y2 = y1 + rotationManager.getSinTheta() * length;
 
         startingX = x2;
         startingY = y2;
+    }
+
+    //+
+    private void rotateLeft(int angle) {
+        rotationManager.setAngle((rotationManager.getAngle() + angle) % 360);
+    }
+
+    //-
+    private void rotateRight(int angle) {
+        rotationManager.setAngle((rotationManager.getAngle() + angle + 180) % 360);
     }
 
     private void drawLine() {
@@ -113,17 +118,5 @@ public class Renderer extends AbstractRenderer {
         glVertex2f(x2, y2);
 
         glEnd();
-    }
-
-    //+
-    private void rotateLeft(int angle) {
-        this.angle += angle;
-        this.angle = this.angle % 360;
-    }
-
-    //-
-    private void rotateRight(int angle) {
-        this.angle += angle + 180;
-        this.angle = this.angle % 360;
     }
 }
