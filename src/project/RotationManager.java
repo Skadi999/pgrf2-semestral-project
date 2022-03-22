@@ -7,7 +7,7 @@ public class RotationManager {
     private float sinTheta;
 
     public RotationManager(int angle) {
-        this.angle = angle;
+        this.angle = angle % 360;
         convertToRadAndSetCosSin();
     }
 
@@ -22,7 +22,7 @@ public class RotationManager {
     }
 
     public void setAngle(int angle) {
-        this.angle = angle;
+        this.angle = angle % 360;
         convertToRadAndSetCosSin();
     }
 

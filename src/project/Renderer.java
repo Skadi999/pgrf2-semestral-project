@@ -4,6 +4,13 @@ import global.AbstractRenderer;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import project.patterns.KochIsle;
+import project.patterns.Pattern;
+import project.patterns.SimpleTree;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -21,10 +28,15 @@ public class Renderer extends AbstractRenderer {
     private int lengthDivisor;
 
     private RotationManager rotationManager;
+    private int rotAngle;
 
     private String axiom;
     private String lSystem;
     private int generationCount;
+
+    private List<Rule> rules = new ArrayList<>();
+
+    private Stack<State> states = new Stack<>();
 
     public Renderer() {
         super(800, 800);
@@ -67,57 +79,67 @@ public class Renderer extends AbstractRenderer {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-        setInitialStartingCoords();
+        initializeLSystem();
 
-        axiom = "F+F+F+F";
-        lengthDivisor = 5;
+        convertLSystemByRuleWithGenerations();
 
-        generationCount = 2;
-
-        lSystem = axiom;
-        convertCharsByRule();
-
-        drawLSystem(90);
+        drawLSystem();
     }
 
-    //todo: don't forget rules will be stored in a LIST
-    //todo: can try doing replaceAll but maybe it will cause problems
-    private void convertCharsByRule() {
-        Rule ruleOne = new Rule('F', "F+F-F-FF+F+F-F");
-        StringBuilder newLSystem = new StringBuilder();
-
+    private void convertLSystemByRuleWithGenerations() {
         for (int i = 0; i < generationCount; i++) {
-            for (int j = 0; j < lSystem.length(); j++) {
-                if (lSystem.charAt(j) == ruleOne.getCharToConvert()) {
-                    newLSystem.append(ruleOne.getConversion());
-                } else {
-                    newLSystem.append(lSystem.charAt(j));
-                }
-            }
-            lSystem = newLSystem.toString();
-            newLSystem = new StringBuilder();
-            divideLength();
+            convertLSystemByRule();
         }
     }
 
-    private void setInitialStartingCoords() {
-        startingX = 0.3f;
-        startingY = 0.3f;
-        length = 1f;
-        rotationManager = new RotationManager(270);
+    private void convertLSystemByRule() {
+        StringBuilder newLSystem = new StringBuilder();
+
+        for (int i = 0; i < lSystem.length(); i++) {
+            for (int j = 0; j < rules.size(); j++) {
+                if (lSystem.charAt(i) == rules.get(j).getCharToConvert()) {
+                    newLSystem.append(rules.get(j).getConversion());
+                    break;
+                } else if (j == rules.size() - 1) {
+                    newLSystem.append(lSystem.charAt(i));
+                }
+            }
+        }
+        lSystem = newLSystem.toString();
+
+        divideLength();
     }
 
-    private void drawLSystem(int angleToRotate) {
+    private void initializeLSystem() {
+//        Pattern pattern = new SimpleTree();
+        Pattern pattern = new KochIsle();
+
+        startingX = pattern.getStartingX();
+        startingY = pattern.getStartingY();
+        length = pattern.getLength();
+        lengthDivisor = pattern.getLengthDivisor();
+        axiom = pattern.getAxiom();
+        rules = pattern.getRules();
+        rotAngle = pattern.getRotAngle();
+
+        generationCount = 3;
+        rotationManager = new RotationManager(pattern.getAngle());
+
+        lSystem = axiom;
+    }
+    //todo check maybe shouldnt save angle
+    private void drawLSystem() {
         for (int i = 0; i < lSystem.length(); i++) {
             switch (lSystem.charAt(i)) {
                 case 'F' -> stepAndDrawLine();
                 case 'f' -> step();
-                case '+' -> rotateRight(angleToRotate);
-                case '-' -> rotateLeft(angleToRotate);
+                case '+' -> rotateRight(rotAngle);
+                case '-' -> rotateLeft(rotAngle);
+                case '[' -> saveState();
+                case ']' -> restoreState();
             }
         }
     }
-
 
     //F
     private void stepAndDrawLine() {
@@ -138,12 +160,27 @@ public class Renderer extends AbstractRenderer {
 
     //+
     private void rotateRight(int angle) {
-        rotationManager.setAngle((rotationManager.getAngle() + angle + 180) % 360);
+        rotationManager.setAngle((rotationManager.getAngle() + angle + 180));
     }
 
     //-
     private void rotateLeft(int angle) {
-        rotationManager.setAngle((rotationManager.getAngle() + angle) % 360);
+        rotationManager.setAngle((rotationManager.getAngle() + angle));
+    }
+
+    private void saveState() {
+        State state = new State(startingX, startingY, x2, y2, rotationManager.getAngle(), length);
+        states.push(state);
+    }
+
+    private void restoreState() {
+        State state = states.pop();
+        startingX = state.getX1();
+        startingY = state.getY1();
+        x2 = state.getX2();
+        y2 = state.getY2();
+        rotationManager.setAngle(state.getAngle());
+        length = state.getLength();
     }
 
     private void divideLength() {
