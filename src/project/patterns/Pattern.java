@@ -6,20 +6,20 @@ import java.util.List;
 
 //todo: find a way to refactor the constructor
 public abstract class Pattern {
-    private float startingX;
-    private float startingY;
+    private final float startingX;
+    private final float startingY;
 
-    private float length;
-    private int lengthDivisor;
+    private final float length;
+    private final float lengthDivisor;
 
-    private String axiom;
+    private final String axiom;
 
-    private List<Rule> rules;
+    private final List<Rule> rules;
 
-    private int angle;
-    private int rotAngle;
+    private final int angle;
+    private final int rotAngle;
 
-    public Pattern(float startingX, float startingY, int angle, int rotAngle, float length, int lengthDivisor, String axiom, List<Rule> rules) {
+    public Pattern(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor, String axiom, List<Rule> rules) {
         this.startingX = startingX;
         this.startingY = startingY;
         this.angle = angle;
@@ -42,7 +42,7 @@ public abstract class Pattern {
         return length;
     }
 
-    public int getLengthDivisor() {
+    public float getLengthDivisor() {
         return lengthDivisor;
     }
 

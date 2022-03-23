@@ -6,7 +6,7 @@ import java.util.List;
 
 public class KochIsle extends Pattern {
     public KochIsle() {
-        super(0.3f,
+        super(-0.2f,
                 0.3f,
                 270,
                 90,
