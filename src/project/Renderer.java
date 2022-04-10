@@ -38,8 +38,8 @@ public class Renderer extends AbstractRenderer {
         glfwScrollCallback = new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double dx, double dy) {
-//                glTranslatef(0.1f, 0, 0);
-                glScalef(0.5f, 1f, 1);
+                glTranslatef(-0.2275f, 0, 0);
+//                glScalef(0.3f, 0.3f, 1);
                 //do nothing
             }
         };
@@ -62,7 +62,7 @@ public class Renderer extends AbstractRenderer {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-        lSystem.run(1, new BetterTree());
+        lSystem.run(4, new BetterTree());
     }
 
 }

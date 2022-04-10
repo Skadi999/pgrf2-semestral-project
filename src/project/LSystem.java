@@ -35,60 +35,49 @@ public class LSystem {
 
     private Stack<State> states = new Stack<>();
 
-    //These booleans are used because the run method runs in an infinite loop, but scaling and centering has to be
-    //done only once.
-    private boolean isScaled;
-    private boolean isCentered;
-
     private float shapeWidth;
     private float shapeHeight;
 
-    private float newLength;
-
     private Generator generator;
+
+    private boolean isScaled;
 
     public void run(int generationCount, Generator generator) {
         initializeLSystem(generationCount, generator);
         convertLSystemByRuleWithGenerations();
 
-        if (!isScaled) {
-            fixScaling();
-            isScaled = true;
-        }
-
-        length = newLength;
-
         drawLSystem();
         drawBoundsBox();
 
-        if (!isCentered) {
-            centerShape();
-            isCentered = true;
+        if (!isScaled) {
+            fixScaleAndPosition();
+            isScaled = true;
         }
+//    drawLineDebug();
+
     }
 
-    private void fixScaling() {
-        newLength = length;
-        traceShapeAndReset();
+    //for debugging
+    private void drawLineDebug() {
+        glBegin(GL_LINES);
+        glColor3f(0f, 0f, 1f);
 
-        //if shape is too big
-        while (shapeWidth > 1.8f || shapeHeight > 1.8f) {
-            newLength -= 0.01f;
-            length = newLength;
-            traceShapeAndReset();
-        }
+        glVertex2f(0.5f, 0.8f);
+        glVertex2f(0.7f, 0.8f);
 
-        //if shape is too small
-        //With some generationCounts, this method works incorrectly.
-//        while (shapeWidth < 1f || shapeHeight < 1f) {
-//            newLength += 0.001f;
-//            length = newLength;
-//            traceShapeAndReset();
-//        }
+        glVertex2f(0.5f, 0.8f);
+        glVertex2f(0.5f, 0.6f);
+
+        glVertex2f(0.5f, 0.6f);
+        glVertex2f(0.7f, 0.6f);
+
+        glVertex2f(0.7f, 0.8f);
+        glVertex2f(0.7f, 0.6f);
+
+        glEnd();
     }
 
-    //Constructs the shape without drawing it, in order to find min and max coords
-    //todo: try creating a new LSystem instance so that you don't have to reset the shape every time
+    //unused
     private void traceShapeAndReset() {
         //trace
         traceLSystem();
@@ -102,28 +91,69 @@ public class LSystem {
         convertLSystemByRuleWithGenerations();
     }
 
-    //for debugging
-    private void drawLineDebug() {
-        glBegin(GL_LINES);
-        glColor3f(0f, 0f, 1f);
+    //Does not UPSIZE small shapes, only centers and, if a shape is too big, downscales it.
+    //todo: implement upscaling & refactor
+    private void fixScaleAndPosition() {
+        shapeWidth = Math.abs(xMax - xMin);
+        shapeHeight = Math.abs(yMax - yMin);
 
-        glVertex2f(-0.8f, -0.8f);
-        glVertex2f(0.8f, -0.8f);
+        if (shapeWidth < 1.8f && shapeHeight < 1.8f) {
+            float xCenter = xMin + shapeWidth / 2;
+            float yCenter = yMin + shapeHeight / 2;
+            float distanceToWindowXCenter = 0 - xCenter;
+            float distanceToWindowYCenter = 0 - yCenter;
+            glTranslatef(distanceToWindowXCenter, distanceToWindowYCenter, 1);
+        }
 
-        glEnd();
-    }
+        else if (shapeWidth > 1.8f || shapeHeight > 1.8f) {
+            float widthScalingFactor;
+            float heightScalingFactor;
+            float totalScalingFactor = 1f;
 
-    private void centerShape() {
-        float width = Math.abs(xMax - xMin);
-        float height = Math.abs(yMax - yMin);
+            if (shapeWidth > 1.8f) {
+                widthScalingFactor = 1 / (shapeWidth / 1.8f);
+                totalScalingFactor *= widthScalingFactor;
 
-        float xCenter = xMin + width / 2;
-        float distanceToWindowXCenter = 0 - xCenter;
+                if (shapeHeight * widthScalingFactor > 1.8f) {
+                    heightScalingFactor = 1 / (shapeHeight / 1.8f);
+                    totalScalingFactor *= heightScalingFactor;
+                }
+                glScalef(totalScalingFactor, totalScalingFactor, 1);
+            } else {
+                heightScalingFactor = 1 / (shapeHeight / 1.8f);
+                totalScalingFactor *= heightScalingFactor;
 
-        float yCenter = yMin + height / 2;
-        float distanceToWindowYCenter = 0 - yCenter;
+                if (shapeWidth * heightScalingFactor > 1.8f) {
+                    widthScalingFactor = 1 / (shapeWidth / 1.8f);
+                    totalScalingFactor *= widthScalingFactor;
+                }
+                glScalef(totalScalingFactor, totalScalingFactor, 1);
+            }
+            //After scaling, we must translate it back to the center again.
+            float xMinDistanceToCenter = Math.abs(0 - xMin);
+            float xMaxDistanceToCenter = Math.abs(0 - xMax);
+            float yMinDistanceToCenter = Math.abs(0 - yMin);
+            float yMaxDistanceToCenter = Math.abs(0 - yMax);
 
-        glTranslatef(distanceToWindowXCenter, distanceToWindowYCenter, 0);
+            float scaledXMin;
+            float scaledXMax;
+            float scaledYMin;
+            float scaledYMax;
+
+            scaledXMin = (xMin < 0) ? (xMin + xMinDistanceToCenter * (1 - totalScalingFactor)) :
+                    (xMin - xMinDistanceToCenter * (1 - totalScalingFactor));
+            scaledXMax = (xMax < 0) ? (xMax + xMaxDistanceToCenter * (1 - totalScalingFactor)) :
+                    (xMax - xMaxDistanceToCenter * (1 - totalScalingFactor));
+            scaledYMin = (yMin < 0) ? (yMin + yMinDistanceToCenter * (1 - totalScalingFactor)) :
+                    (yMin - yMinDistanceToCenter * (1 - totalScalingFactor));
+            scaledYMax = (yMax < 0) ? (yMax + yMaxDistanceToCenter * (1 - totalScalingFactor)) :
+                    (yMax - yMaxDistanceToCenter * (1 - totalScalingFactor));
+
+            float scaledXCenter = (scaledXMin + scaledXMax) / 2;
+            float scaledYCenter = (scaledYMin + scaledYMax) / 2;
+
+            glTranslatef((-scaledXCenter)/totalScalingFactor, (-scaledYCenter)/totalScalingFactor, 0);
+        }
     }
 
     private void initializeLSystem(int generationCount, Generator generator) {
@@ -135,7 +165,6 @@ public class LSystem {
         lengthDivisor = generator.getLengthDivisor();
         rules = generator.getRules();
         rotAngle = generator.getRotAngle();
-
         this.generator = generator;
         this.generationCount = generationCount;
 
@@ -170,8 +199,9 @@ public class LSystem {
         divideLength();
     }
 
+
     //Same as drawLSystem(), but F and G function same as f. needed to find out min/max coords for translations
-    //not needed. Will probably remove later.
+    //unused
     private void traceLSystem() {
         for (int i = 0; i < lSystem.length(); i++) {
             switch (lSystem.charAt(i)) {
@@ -272,7 +302,7 @@ public class LSystem {
         glEnd();
     }
 
-    //Draws a bounds box based on x and y min and max coordinates. Used for debugging. todo: this method later.
+    //Draws a bounds box based on x and y min and max coordinates. Used for debugging. todo: delete this method later.
     private void drawBoundsBox() {
         glBegin(GL_LINES);
         glColor3f(1f, 0f, 0f);
