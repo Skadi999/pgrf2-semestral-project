@@ -1,10 +1,10 @@
-package project.patterns;
+package project.generators;
 
 import project.Rule;
 
 import java.util.List;
 
-public class KochIsle extends Pattern {
+public class KochIsle extends Generator {
     public KochIsle() {
         super(-0.2f,
                 0.3f,

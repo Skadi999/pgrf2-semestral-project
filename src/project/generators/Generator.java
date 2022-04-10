@@ -1,11 +1,11 @@
-package project.patterns;
+package project.generators;
 
 import project.Rule;
 
 import java.util.List;
 
 //todo: find a way to refactor the constructor
-public abstract class Pattern {
+public abstract class Generator {
     private final float startingX;
     private final float startingY;
 
@@ -19,7 +19,7 @@ public abstract class Pattern {
     private final int angle;
     private final int rotAngle;
 
-    public Pattern(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor, String axiom, List<Rule> rules) {
+    public Generator(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor, String axiom, List<Rule> rules) {
         this.startingX = startingX;
         this.startingY = startingY;
         this.angle = angle;
