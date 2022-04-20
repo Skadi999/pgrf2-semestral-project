@@ -4,7 +4,6 @@ import project.Rule;
 
 import java.util.List;
 
-//todo: find a way to refactor the constructor
 public abstract class Generator {
     private final float startingX;
     private final float startingY;

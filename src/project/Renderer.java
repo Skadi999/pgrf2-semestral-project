@@ -62,7 +62,7 @@ public class Renderer extends AbstractRenderer {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-        lSystem.run(4, new BetterTree());
+        lSystem.run(5, new BetterTree());
     }
 
 }

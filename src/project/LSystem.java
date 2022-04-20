@@ -77,83 +77,53 @@ public class LSystem {
         glEnd();
     }
 
-    //unused
-    private void traceShapeAndReset() {
-        //trace
-        traceLSystem();
-
-        //set width and height based on min and max coords
-        shapeWidth = Math.abs(xMax - xMin);
-        shapeHeight = Math.abs(yMax - yMin);
-
-        //reset shape parameters
-        initializeLSystem(generationCount, generator);
-        convertLSystemByRuleWithGenerations();
-    }
-
-    //Does not UPSIZE small shapes, only centers and, if a shape is too big, downscales it.
-    //todo: implement upscaling & refactor
     private void fixScaleAndPosition() {
         shapeWidth = Math.abs(xMax - xMin);
         shapeHeight = Math.abs(yMax - yMin);
 
-        if (shapeWidth < 1.8f && shapeHeight < 1.8f) {
-            float xCenter = xMin + shapeWidth / 2;
-            float yCenter = yMin + shapeHeight / 2;
-            float distanceToWindowXCenter = 0 - xCenter;
-            float distanceToWindowYCenter = 0 - yCenter;
-            glTranslatef(distanceToWindowXCenter, distanceToWindowYCenter, 1);
-        }
+        float widthScalingFactor = 0.0f;
+        float heightScalingFactor = 0.0f;
+        float totalScalingFactor = 1f;
 
-        else if (shapeWidth > 1.8f || shapeHeight > 1.8f) {
-            float widthScalingFactor;
-            float heightScalingFactor;
-            float totalScalingFactor = 1f;
+        if (shapeWidth > 1.8f) {
+            widthScalingFactor = 1 / (shapeWidth / 1.8f);
+            totalScalingFactor *= widthScalingFactor;
 
-            if (shapeWidth > 1.8f) {
-                widthScalingFactor = 1 / (shapeWidth / 1.8f);
-                totalScalingFactor *= widthScalingFactor;
-
-                if (shapeHeight * widthScalingFactor > 1.8f) {
-                    heightScalingFactor = 1 / (shapeHeight / 1.8f);
-                    totalScalingFactor *= heightScalingFactor;
-                }
-                glScalef(totalScalingFactor, totalScalingFactor, 1);
-            } else {
+            if (shapeHeight * widthScalingFactor > 1.8f) {
                 heightScalingFactor = 1 / (shapeHeight / 1.8f);
                 totalScalingFactor *= heightScalingFactor;
-
-                if (shapeWidth * heightScalingFactor > 1.8f) {
-                    widthScalingFactor = 1 / (shapeWidth / 1.8f);
-                    totalScalingFactor *= widthScalingFactor;
-                }
-                glScalef(totalScalingFactor, totalScalingFactor, 1);
             }
-            //After scaling, we must translate it back to the center again.
-            float xMinDistanceToCenter = Math.abs(0 - xMin);
-            float xMaxDistanceToCenter = Math.abs(0 - xMax);
-            float yMinDistanceToCenter = Math.abs(0 - yMin);
-            float yMaxDistanceToCenter = Math.abs(0 - yMax);
+            glScalef(totalScalingFactor, totalScalingFactor, 1);
+        } else {
+            heightScalingFactor = 1 / (shapeHeight / 1.8f);
+            totalScalingFactor *= heightScalingFactor;
 
-            float scaledXMin;
-            float scaledXMax;
-            float scaledYMin;
-            float scaledYMax;
-
-            scaledXMin = (xMin < 0) ? (xMin + xMinDistanceToCenter * (1 - totalScalingFactor)) :
-                    (xMin - xMinDistanceToCenter * (1 - totalScalingFactor));
-            scaledXMax = (xMax < 0) ? (xMax + xMaxDistanceToCenter * (1 - totalScalingFactor)) :
-                    (xMax - xMaxDistanceToCenter * (1 - totalScalingFactor));
-            scaledYMin = (yMin < 0) ? (yMin + yMinDistanceToCenter * (1 - totalScalingFactor)) :
-                    (yMin - yMinDistanceToCenter * (1 - totalScalingFactor));
-            scaledYMax = (yMax < 0) ? (yMax + yMaxDistanceToCenter * (1 - totalScalingFactor)) :
-                    (yMax - yMaxDistanceToCenter * (1 - totalScalingFactor));
-
-            float scaledXCenter = (scaledXMin + scaledXMax) / 2;
-            float scaledYCenter = (scaledYMin + scaledYMax) / 2;
-
-            glTranslatef((-scaledXCenter)/totalScalingFactor, (-scaledYCenter)/totalScalingFactor, 0);
+            if (shapeWidth * heightScalingFactor > 1.8f) {
+                widthScalingFactor = 1 / (shapeWidth / 1.8f);
+                totalScalingFactor *= widthScalingFactor;
+            }
+            glScalef(totalScalingFactor, totalScalingFactor, 1);
         }
+
+        //After scaling, we must translate it back to the center again.
+        float xMinDistanceToCenter = Math.abs(0 - xMin);
+        float xMaxDistanceToCenter = Math.abs(0 - xMax);
+        float yMinDistanceToCenter = Math.abs(0 - yMin);
+        float yMaxDistanceToCenter = Math.abs(0 - yMax);
+
+        float scaledXMin = (xMin < 0) ? (xMin + xMinDistanceToCenter * (1 - totalScalingFactor)) :
+                (xMin - xMinDistanceToCenter * (1 - totalScalingFactor));
+        float scaledXMax = (xMax < 0) ? (xMax + xMaxDistanceToCenter * (1 - totalScalingFactor)) :
+                (xMax - xMaxDistanceToCenter * (1 - totalScalingFactor));
+        float scaledYMin = (yMin < 0) ? (yMin + yMinDistanceToCenter * (1 - totalScalingFactor)) :
+                (yMin - yMinDistanceToCenter * (1 - totalScalingFactor));
+        float scaledYMax = (yMax < 0) ? (yMax + yMaxDistanceToCenter * (1 - totalScalingFactor)) :
+                (yMax - yMaxDistanceToCenter * (1 - totalScalingFactor));
+
+        float scaledXCenter = (scaledXMin + scaledXMax) / 2;
+        float scaledYCenter = (scaledYMin + scaledYMax) / 2;
+
+        glTranslatef((-scaledXCenter) / totalScalingFactor, (-scaledYCenter) / totalScalingFactor, 0);
     }
 
     private void initializeLSystem(int generationCount, Generator generator) {
@@ -197,21 +167,6 @@ public class LSystem {
         lSystem = newLSystem.toString();
 
         divideLength();
-    }
-
-
-    //Same as drawLSystem(), but F and G function same as f. needed to find out min/max coords for translations
-    //unused
-    private void traceLSystem() {
-        for (int i = 0; i < lSystem.length(); i++) {
-            switch (lSystem.charAt(i)) {
-                case 'f', 'F', 'G' -> step();
-                case '+' -> rotateLeft(rotAngle);
-                case '-' -> rotateRight(rotAngle);
-                case '[' -> saveState();
-                case ']' -> restoreState();
-            }
-        }
     }
 
     //todo stochastic L-systems
