@@ -18,7 +18,10 @@ public abstract class Generator {
     private final int angle;
     private final int rotAngle;
 
-    public Generator(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor, String axiom, List<Rule> rules) {
+    private final int maxGen;
+
+    public Generator(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor,
+                     String axiom, List<Rule> rules, int maxGen) {
         this.startingX = startingX;
         this.startingY = startingY;
         this.angle = angle;
@@ -27,6 +30,7 @@ public abstract class Generator {
         this.lengthDivisor = lengthDivisor;
         this.axiom = axiom;
         this.rules = rules;
+        this.maxGen = maxGen;
     }
 
     public float getStartingX() {
@@ -59,5 +63,9 @@ public abstract class Generator {
 
     public int getRotAngle() {
         return rotAngle;
+    }
+
+    public int getMaxGen() {
+        return maxGen;
     }
 }

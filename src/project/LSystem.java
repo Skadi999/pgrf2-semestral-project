@@ -35,11 +35,6 @@ public class LSystem {
 
     private Stack<State> states = new Stack<>();
 
-    private float shapeWidth;
-    private float shapeHeight;
-
-    private Generator generator;
-
     private boolean isScaled;
 
     public void run(int generationCount, Generator generator) {
@@ -47,42 +42,21 @@ public class LSystem {
         convertLSystemByRuleWithGenerations();
 
         drawLSystem();
-        drawBoundsBox();
+//        drawBoundsBox();
 
         if (!isScaled) {
             fixScaleAndPosition();
             isScaled = true;
         }
-//    drawLineDebug();
-
     }
 
-    //for debugging
-    private void drawLineDebug() {
-        glBegin(GL_LINES);
-        glColor3f(0f, 0f, 1f);
-
-        glVertex2f(0.5f, 0.8f);
-        glVertex2f(0.7f, 0.8f);
-
-        glVertex2f(0.5f, 0.8f);
-        glVertex2f(0.5f, 0.6f);
-
-        glVertex2f(0.5f, 0.6f);
-        glVertex2f(0.7f, 0.6f);
-
-        glVertex2f(0.7f, 0.8f);
-        glVertex2f(0.7f, 0.6f);
-
-        glEnd();
-    }
-
+    //fix kochisle gen 5
     private void fixScaleAndPosition() {
-        shapeWidth = Math.abs(xMax - xMin);
-        shapeHeight = Math.abs(yMax - yMin);
+        float shapeWidth = Math.abs(xMax - xMin);
+        float shapeHeight = Math.abs(yMax - yMin);
 
-        float widthScalingFactor = 0.0f;
-        float heightScalingFactor = 0.0f;
+        float widthScalingFactor;
+        float heightScalingFactor;
         float totalScalingFactor = 1f;
 
         if (shapeWidth > 1.8f) {
@@ -93,6 +67,7 @@ public class LSystem {
                 heightScalingFactor = 1 / (shapeHeight / 1.8f);
                 totalScalingFactor *= heightScalingFactor;
             }
+            glPushMatrix();
             glScalef(totalScalingFactor, totalScalingFactor, 1);
         } else {
             heightScalingFactor = 1 / (shapeHeight / 1.8f);
@@ -102,10 +77,14 @@ public class LSystem {
                 widthScalingFactor = 1 / (shapeWidth / 1.8f);
                 totalScalingFactor *= widthScalingFactor;
             }
+            glPushMatrix();
             glScalef(totalScalingFactor, totalScalingFactor, 1);
         }
-
         //After scaling, we must translate it back to the center again.
+        centerShapeWithScalingFactor(totalScalingFactor);
+    }
+
+    private void centerShapeWithScalingFactor(float totalScalingFactor) {
         float xMinDistanceToCenter = Math.abs(0 - xMin);
         float xMaxDistanceToCenter = Math.abs(0 - xMax);
         float yMinDistanceToCenter = Math.abs(0 - yMin);
@@ -123,19 +102,28 @@ public class LSystem {
         float scaledXCenter = (scaledXMin + scaledXMax) / 2;
         float scaledYCenter = (scaledYMin + scaledYMax) / 2;
 
+        glPushMatrix();
         glTranslatef((-scaledXCenter) / totalScalingFactor, (-scaledYCenter) / totalScalingFactor, 0);
     }
 
     private void initializeLSystem(int generationCount, Generator generator) {
         startingX = generator.getStartingX();
         startingY = generator.getStartingY();
+        xMin = startingX;
+        yMin = startingY;
         xMax = startingX;
         yMax = startingY;
         length = generator.getLength();
         lengthDivisor = generator.getLengthDivisor();
         rules = generator.getRules();
         rotAngle = generator.getRotAngle();
-        this.generator = generator;
+
+        //If we changed the genCount in Renderer, reset isScaled to false. This is necessary, because otherwise
+        //The isScaled stays true and the LSystem with the new genCount will not be scaled/positioned
+//        if (this.generationCount != generationCount) {
+//            isScaled = false;
+//        }
+
         this.generationCount = generationCount;
 
         rotationManager = new RotationManager(generator.getAngle());
@@ -257,7 +245,7 @@ public class LSystem {
         glEnd();
     }
 
-    //Draws a bounds box based on x and y min and max coordinates. Used for debugging. todo: delete this method later.
+    //Draws a bounds box based on x and y min and max coordinates. Used for debugging.
     private void drawBoundsBox() {
         glBegin(GL_LINES);
         glColor3f(1f, 0f, 0f);
@@ -273,6 +261,26 @@ public class LSystem {
 
         glVertex2f(xMax, yMax);
         glVertex2f(xMax, yMin);
+
+        glEnd();
+    }
+
+    //for debugging
+    private void drawLineDebug() {
+        glBegin(GL_LINES);
+        glColor3f(0f, 0f, 1f);
+
+        glVertex2f(0.5f, 0.8f);
+        glVertex2f(0.7f, 0.8f);
+
+        glVertex2f(0.5f, 0.8f);
+        glVertex2f(0.5f, 0.6f);
+
+        glVertex2f(0.5f, 0.6f);
+        glVertex2f(0.7f, 0.6f);
+
+        glVertex2f(0.7f, 0.8f);
+        glVertex2f(0.7f, 0.6f);
 
         glEnd();
     }

@@ -10,8 +10,7 @@ public class SimpleTree extends Generator {
                 List.of(
                         new Rule('F', "G[+F]-F"),
                         new Rule('G', "GG")
-                ));
+                ),
+                10);
     }
 }
-
-//F[-F]F[+F][F]

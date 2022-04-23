@@ -11,9 +11,12 @@ public class KochIsle extends Generator {
                 270,
                 90,
                 1f,
-                5,
+                2,
                 "F+F+F+F",
-                List.of(new Rule('F', "F+F-F-FF+F+F-F"))
+                List.of(new Rule('F', "F+F-F-FF+F+F-F")),
+                5
         );
     }
+    //F+F+F+F
+    //F+F-F-FF+F+F-F
 }
