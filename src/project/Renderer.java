@@ -5,10 +5,7 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
-import project.generators.BetterTree;
-import project.generators.Generator;
-import project.generators.KochIsle;
-import project.generators.SimpleTree;
+import project.generators.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,10 +15,10 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
-    private int genCount = 3;
-    private Generator generator = new KochIsle();
-//    private boolean animToggle = false;
-    private List<Generator> generators = Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
+    private int genCount = 0;
+    private Generator generator = new QuadraticSnowflakeVariant();
+    private final List<Generator> generators =
+            Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
     private int generatorIndex = 0;
 
 
@@ -49,8 +46,6 @@ public class Renderer extends AbstractRenderer {
         glfwScrollCallback = new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double dx, double dy) {
-//                glTranslatef(-0.2275f, 0, 0);
-//                glScalef(0.3f, 0.3f, 1);
             }
         };
 
@@ -86,7 +81,6 @@ public class Renderer extends AbstractRenderer {
                         }
                         case GLFW_KEY_L -> // Resets matrix
                                 glLoadIdentity();
-//                        case GLFW_KEY_T -> animToggle = !animToggle;
                     }
                 }
             }
@@ -120,13 +114,4 @@ public class Renderer extends AbstractRenderer {
         generator = generators.get(generatorIndex);
         genCount = 0;
     }
-
-//    private void animate() {
-//        if (genCount == generator.getMaxGen()) genCount = 0;
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        lSystem.run(genCount, generator);
-//        glLoadIdentity();
-//        lSystem = new LSystem();
-//        genCount++;
-//    }
 }

@@ -5,9 +5,6 @@ import project.Rule;
 import java.util.List;
 
 public abstract class Generator {
-    private final float startingX;
-    private final float startingY;
-
     private final float length;
     private final float lengthDivisor;
 
@@ -20,10 +17,8 @@ public abstract class Generator {
 
     private final int maxGen;
 
-    public Generator(float startingX, float startingY, int angle, int rotAngle, float length, float lengthDivisor,
+    public Generator(int angle, int rotAngle, float length, float lengthDivisor,
                      String axiom, List<Rule> rules, int maxGen) {
-        this.startingX = startingX;
-        this.startingY = startingY;
         this.angle = angle;
         this.rotAngle = rotAngle;
         this.length = length;
@@ -31,14 +26,6 @@ public abstract class Generator {
         this.axiom = axiom;
         this.rules = rules;
         this.maxGen = maxGen;
-    }
-
-    public float getStartingX() {
-        return startingX;
-    }
-
-    public float getStartingY() {
-        return startingY;
     }
 
     public float getLength() {

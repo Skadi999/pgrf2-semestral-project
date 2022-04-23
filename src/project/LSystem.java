@@ -50,8 +50,6 @@ public class LSystem {
         }
     }
 
-    //fix kochisle gen 5
-    //fix this damn algo
     private void fixScaleAndPosition() {
         float shapeWidth = Math.abs(xMax - xMin);
         float shapeHeight = Math.abs(yMax - yMin);
@@ -107,8 +105,8 @@ public class LSystem {
     }
 
     private void initializeLSystem(int generationCount, Generator generator) {
-        startingX = generator.getStartingX();
-        startingY = generator.getStartingY();
+        startingX = 0;
+        startingY = 0;
         xMin = startingX;
         yMin = startingY;
         xMax = startingX;
@@ -117,13 +115,6 @@ public class LSystem {
         lengthDivisor = generator.getLengthDivisor();
         rules = generator.getRules();
         rotAngle = generator.getRotAngle();
-
-        //If we changed the genCount in Renderer, reset isScaled to false. This is necessary, because otherwise
-        //The isScaled stays true and the LSystem with the new genCount will not be scaled/positioned
-//        if (this.generationCount != generationCount) {
-//            isScaled = false;
-//        }
-
         this.generationCount = generationCount;
 
         rotationManager = new RotationManager(generator.getAngle());
@@ -161,7 +152,7 @@ public class LSystem {
     private void drawLSystem() {
         for (int i = 0; i < lSystem.length(); i++) {
             switch (lSystem.charAt(i)) {
-                case 'F', 'G' -> stepAndDrawLine();
+                case 'F', 'G', 'X', 'Y' -> stepAndDrawLine();
                 case 'f' -> step();
                 case '+' -> rotateLeft(rotAngle);
                 case '-' -> rotateRight(rotAngle);

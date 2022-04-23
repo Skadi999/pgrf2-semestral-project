@@ -6,8 +6,7 @@ import java.util.List;
 
 public class KochIsle extends Generator {
     public KochIsle() {
-        super(-0.2f,
-                0.3f,
+        super(
                 270,
                 90,
                 1f,
