@@ -51,6 +51,7 @@ public class LSystem {
     }
 
     //fix kochisle gen 5
+    //fix this damn algo
     private void fixScaleAndPosition() {
         float shapeWidth = Math.abs(xMax - xMin);
         float shapeHeight = Math.abs(yMax - yMin);
@@ -59,27 +60,26 @@ public class LSystem {
         float heightScalingFactor;
         float totalScalingFactor = 1f;
 
-        if (shapeWidth > 1.8f) {
+        //downscaling if the shape is too large
+        if (shapeWidth >= shapeHeight && shapeWidth > 1.8f) {
             widthScalingFactor = 1 / (shapeWidth / 1.8f);
             totalScalingFactor *= widthScalingFactor;
-
-            if (shapeHeight * widthScalingFactor > 1.8f) {
-                heightScalingFactor = 1 / (shapeHeight / 1.8f);
-                totalScalingFactor *= heightScalingFactor;
-            }
-            glPushMatrix();
-            glScalef(totalScalingFactor, totalScalingFactor, 1);
-        } else {
+        } else if (shapeHeight > shapeWidth && shapeHeight > 1.8f) {
             heightScalingFactor = 1 / (shapeHeight / 1.8f);
             totalScalingFactor *= heightScalingFactor;
-
-            if (shapeWidth * heightScalingFactor > 1.8f) {
-                widthScalingFactor = 1 / (shapeWidth / 1.8f);
-                totalScalingFactor *= widthScalingFactor;
-            }
-            glPushMatrix();
-            glScalef(totalScalingFactor, totalScalingFactor, 1);
+        } //upscaling
+        else if (shapeWidth >= shapeHeight && shapeWidth < 1.8f) {
+            widthScalingFactor = 1 / (shapeWidth / 1.8f);
+            totalScalingFactor *= widthScalingFactor;
+        } else if (shapeHeight > shapeWidth && shapeHeight < 1.8f) {
+            heightScalingFactor = 1 / (shapeHeight / 1.8f);
+            totalScalingFactor *= heightScalingFactor;
         }
+
+
+        glPushMatrix();
+        glScalef(totalScalingFactor, totalScalingFactor, 1);
+
         //After scaling, we must translate it back to the center again.
         centerShapeWithScalingFactor(totalScalingFactor);
     }

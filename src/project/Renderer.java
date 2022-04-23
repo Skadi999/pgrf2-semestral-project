@@ -10,7 +10,6 @@ import project.generators.Generator;
 import project.generators.KochIsle;
 import project.generators.SimpleTree;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,9 +18,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
-    private int genCount = 0;
-    private Generator generator = new SimpleTree();
-    private boolean animToggle = false;
+    private int genCount = 3;
+    private Generator generator = new KochIsle();
+//    private boolean animToggle = false;
     private List<Generator> generators = Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
     private int generatorIndex = 0;
 
@@ -72,7 +71,7 @@ public class Renderer extends AbstractRenderer {
                             lSystem = new LSystem();
                             genCount--;
                         }
-                        case GLFW_KEY_RIGHT -> {
+                        case GLFW_KEY_RIGHT -> { //change generator type
                             glLoadIdentity();
                             lSystem = new LSystem();
                             setNextGenerator();
