@@ -10,13 +10,20 @@ import project.generators.Generator;
 import project.generators.KochIsle;
 import project.generators.SimpleTree;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
     private int genCount = 0;
-    private Generator generator = new BetterTree();
+    private Generator generator = new SimpleTree();
+    private boolean animToggle = false;
+    private List<Generator> generators = Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
+    private int generatorIndex = 0;
 
 
     public Renderer() {
@@ -59,13 +66,18 @@ public class Renderer extends AbstractRenderer {
                             lSystem = new LSystem();
                             genCount++;
                         }
-                        case GLFW_KEY_DOWN -> { // increment generation
+                        case GLFW_KEY_DOWN -> { // decrement generation
                             if (genCount == 0) break;
                             glLoadIdentity();
                             lSystem = new LSystem();
                             genCount--;
                         }
-                        case GLFW_KEY_F -> { // Cary - lines
+                        case GLFW_KEY_RIGHT -> {
+                            glLoadIdentity();
+                            lSystem = new LSystem();
+                            setNextGenerator();
+                        }
+                        case GLFW_KEY_F -> { // test
                             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                             lSystem.run(3, new BetterTree());
                         }
@@ -75,9 +87,7 @@ public class Renderer extends AbstractRenderer {
                         }
                         case GLFW_KEY_L -> // Resets matrix
                                 glLoadIdentity();
-                        case GLFW_KEY_T -> {
-
-                        }
+//                        case GLFW_KEY_T -> animToggle = !animToggle;
                     }
                 }
             }
@@ -92,7 +102,6 @@ public class Renderer extends AbstractRenderer {
     //part of game loop
     @Override
     public void display() {
-
         //1:1 scale
         if (width < height) {
             glViewport(0, 0, width, width);
@@ -103,4 +112,22 @@ public class Renderer extends AbstractRenderer {
         lSystem.run(genCount, generator);
     }
 
+    private void setNextGenerator() {
+        if (generatorIndex + 1 == generators.size()) {
+            generatorIndex = 0;
+        } else {
+            generatorIndex++;
+        }
+        generator = generators.get(generatorIndex);
+        genCount = 0;
+    }
+
+//    private void animate() {
+//        if (genCount == generator.getMaxGen()) genCount = 0;
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        lSystem.run(genCount, generator);
+//        glLoadIdentity();
+//        lSystem = new LSystem();
+//        genCount++;
+//    }
 }
