@@ -1,6 +1,7 @@
 package project;
 
 import global.AbstractRenderer;
+import lwjglutils.OGLTextRenderer;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
@@ -16,10 +17,14 @@ import static org.lwjgl.opengl.GL11.*;
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
     private int genCount = 0;
-    private Generator generator = new HillbertCurve();
+    private Generator generator = new StochasticBetterTree();
     private final List<Generator> generators =
-            Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
+            Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle(),
+                    new Bush(), new HillbertCurve(), new QuadraticSnowflakeVariant(), new SierpinskiTriangle(),
+                    new SnowflakeCurve(), new StochasticBush(), new StochasticBetterTree());
     private int generatorIndex = 0;
+
+    public boolean isStop = false;
 
 
     public Renderer() {
@@ -35,7 +40,7 @@ public class Renderer extends AbstractRenderer {
             }
         };
 
-        glfwMouseButtonCallback = null; //glfwMouseButtonCallback do nothing
+        glfwMouseButtonCallback = null;
 
         glfwCursorPosCallback = new GLFWCursorPosCallback() {
             @Override
@@ -61,6 +66,7 @@ public class Renderer extends AbstractRenderer {
                             lSystem = new LSystem();
                             genCount++;
 
+                            isStop = false;
                         }
                         case GLFW_KEY_DOWN -> { // decrement generation
                             if (genCount == 0) break;
@@ -69,23 +75,15 @@ public class Renderer extends AbstractRenderer {
                             lSystem = new LSystem();
                             genCount--;
 
+                            isStop = false;
                         }
                         case GLFW_KEY_RIGHT -> { //change generator type
                             glLoadIdentity();
                             lSystem = new LSystem();
                             setNextGenerator();
 
+                            isStop = false;
                         }
-                        case GLFW_KEY_F -> { // test
-                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-                            lSystem.run(genCount, generator);
-                        }
-                        case GLFW_KEY_E -> { // test
-                            glPushMatrix();
-                            glScalef(0.9f, 0.9f, 0);
-                        }
-                        case GLFW_KEY_L -> glLoadIdentity(); // Resets matrix
-
                     }
                 }
             }
@@ -95,6 +93,7 @@ public class Renderer extends AbstractRenderer {
     @Override
     public void init() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        this.textRenderer = new OGLTextRenderer(width, height);
     }
 
     //part of game loop
@@ -106,8 +105,12 @@ public class Renderer extends AbstractRenderer {
         } else {
             glViewport(0, 0, height, height);
         }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         lSystem.run(genCount, generator);
+
+        textRenderer.addStr2D(3, 20, "Vytvořeno v rámci předmětu PGRF2 na UHK. Autor: Vyacheslav Novak");
+
     }
 
     private void setNextGenerator() {

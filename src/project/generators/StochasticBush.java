@@ -11,6 +11,6 @@ public class StochasticBush extends StochasticGenerator {
                         new Rule('X', "X[-FFF][+FFF]FX"),
                         new Rule('Y', "YFX[+Y][-Y]")
                 ),
-                10, 15, 0.1f);
+                10, 10, 0.01f);
     }
 }

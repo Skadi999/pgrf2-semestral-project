@@ -44,22 +44,24 @@ public class LSystem {
     private float lengthDelta;
 
     public void run(int generationCount, Generator generator) {
-        initializeLSystem(generationCount, generator);
-        convertLSystemByRuleWithGenerations();
-
-        drawLSystem();
+        resetAndDraw(generationCount, generator);
 
         if (!isScaled) {
             fixScaleAndPosition();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            initializeLSystem(generationCount, generator);
-            convertLSystemByRuleWithGenerations();
-            drawLSystem();
+            resetAndDraw(generationCount, generator);
 
             isScaled = true;
         }
+    }
+
+    private void resetAndDraw(int generationCount, Generator generator) {
+        initializeLSystem(generationCount, generator);
+        convertLSystemByRuleWithGenerations();
+
+        drawLSystem();
     }
 
     private void fixScaleAndPosition() {
