@@ -17,15 +17,23 @@ import static org.lwjgl.opengl.GL11.*;
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
     private int genCount = 0;
-    private Generator generator = new StochasticBetterTree();
+    private Generator generator = new SimpleTree();
+    //a list of available generators, you can switch to the next generator with the right arrow key ->
     private final List<Generator> generators =
             Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle(),
                     new Bush(), new HillbertCurve(), new QuadraticSnowflakeVariant(), new SierpinskiTriangle(),
                     new SnowflakeCurve(), new StochasticBush(), new StochasticBetterTree());
+
     private int generatorIndex = 0;
-
+    /*
+    A boolean for stopping/resuming the loop when necessary.
+    The rendering does not constantly refresh itself in the loop, because it's not necessary.
+    The rendering code (in LwjglWindow) IS located inside the loop, but is controlled by this variable
+    This is necessary because otherwise stochastic L-Systems do not render correctly. It also improves performance,
+    and does not cause any problems because the L-Systems are static images, there is no movement involved.
+    See LwjglWindow to see how the variable controls the rendering code in the loop
+    */
     public boolean isStop = false;
-
 
     public Renderer() {
         super(800, 800);
@@ -59,7 +67,7 @@ public class Renderer extends AbstractRenderer {
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (action == GLFW_PRESS) {
                     switch (key) {
-                        case GLFW_KEY_UP -> { // increment generation
+                        case GLFW_KEY_UP -> { // increment generation number and redraw
                             if (genCount == generator.getMaxGen()) break;
 
                             glLoadIdentity();
@@ -68,7 +76,7 @@ public class Renderer extends AbstractRenderer {
 
                             isStop = false;
                         }
-                        case GLFW_KEY_DOWN -> { // decrement generation
+                        case GLFW_KEY_DOWN -> { // decrement generation number and redraw
                             if (genCount == 0) break;
 
                             glLoadIdentity();
@@ -77,7 +85,7 @@ public class Renderer extends AbstractRenderer {
 
                             isStop = false;
                         }
-                        case GLFW_KEY_RIGHT -> { //change generator type
+                        case GLFW_KEY_RIGHT -> { //change generator type to the next one (in the "generators" variable)
                             glLoadIdentity();
                             lSystem = new LSystem();
                             setNextGenerator();
@@ -96,7 +104,7 @@ public class Renderer extends AbstractRenderer {
         this.textRenderer = new OGLTextRenderer(width, height);
     }
 
-    //part of game loop
+    //see LwjglWindow loop
     @Override
     public void display() {
         //1:1 scale

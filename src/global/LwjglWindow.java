@@ -8,6 +8,8 @@ import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
 import project.Renderer;
 
+import javax.swing.*;
+import java.awt.event.ActionListener;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -47,7 +49,7 @@ public class LwjglWindow {
 
     public LwjglWindow(int width, int height, AbstractRenderer renderer, boolean debug) {
         assert renderer instanceof Renderer;
-        this.renderer = (Renderer)renderer;
+        this.renderer = renderer;
 
         DEBUG = debug;
         WIDTH = width;
@@ -195,17 +197,12 @@ public class LwjglWindow {
         // the window or has pressed the ESCAPE key.
         while (!glfwWindowShouldClose(window)) {
 
+            //Only rerenders when necessary. This is controlled by the isStop loop from Renderer.
             if (!((Renderer) this.renderer).isStop) {
                 renderer.display();
-
                 glfwSwapBuffers(window);
                 ((Renderer) this.renderer).isStop = true;
-
             }
-
-//			renderer.display();
-
-//			glfwSwapBuffers(window); // swap the color buffers
 
             // Poll for window events. The key callback above will only be
             // invoked during this call.

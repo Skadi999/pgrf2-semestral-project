@@ -1,5 +1,9 @@
 package project;
 
+/**
+ * This class is used when we want to rotate the direction of an L-System. It takes care of converting angles to radians
+ * and setting the sin and cos thetas.
+ */
 public class RotationManager {
     private int angle;
 

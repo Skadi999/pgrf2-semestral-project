@@ -1,5 +1,10 @@
 package project;
 
+/**
+ * A state represents the current coordinates of an L-System line, their direction and length.
+ * This class is used by the [ and ] operators of the L-System, pushing and popping states into a stack.
+ * @author Vyacheslav Novak
+ */
 public class State {
     private final float x1;
     private final float y1;
