@@ -1,9 +1,11 @@
 package project;
 
 import project.generators.Generator;
+import project.generators.StochasticGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -37,15 +39,25 @@ public class LSystem {
 
     private boolean isScaled;
 
+    private boolean isStochastic;
+    private int rotAngleDelta;
+    private float lengthDelta;
+
     public void run(int generationCount, Generator generator) {
         initializeLSystem(generationCount, generator);
         convertLSystemByRuleWithGenerations();
 
         drawLSystem();
-//        drawBoundsBox();
 
         if (!isScaled) {
             fixScaleAndPosition();
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            initializeLSystem(generationCount, generator);
+            convertLSystemByRuleWithGenerations();
+            drawLSystem();
+
             isScaled = true;
         }
     }
@@ -65,7 +77,7 @@ public class LSystem {
         } else if (shapeHeight > shapeWidth && shapeHeight > 1.8f) {
             heightScalingFactor = 1 / (shapeHeight / 1.8f);
             totalScalingFactor *= heightScalingFactor;
-        } //upscaling
+        } //upscaling if shape is too small
         else if (shapeWidth >= shapeHeight && shapeWidth < 1.8f) {
             widthScalingFactor = 1 / (shapeWidth / 1.8f);
             totalScalingFactor *= widthScalingFactor;
@@ -74,8 +86,6 @@ public class LSystem {
             totalScalingFactor *= heightScalingFactor;
         }
 
-
-        glPushMatrix();
         glScalef(totalScalingFactor, totalScalingFactor, 1);
 
         //After scaling, we must translate it back to the center again.
@@ -100,11 +110,16 @@ public class LSystem {
         float scaledXCenter = (scaledXMin + scaledXMax) / 2;
         float scaledYCenter = (scaledYMin + scaledYMax) / 2;
 
-        glPushMatrix();
         glTranslatef((-scaledXCenter) / totalScalingFactor, (-scaledYCenter) / totalScalingFactor, 0);
     }
 
     private void initializeLSystem(int generationCount, Generator generator) {
+        if (generator instanceof StochasticGenerator) {
+            isStochastic = true;
+            rotAngleDelta = ((StochasticGenerator) generator).getRotAngleDelta();
+            lengthDelta = ((StochasticGenerator) generator).getLengthMultiplierDelta();
+        }
+
         startingX = 0;
         startingY = 0;
         xMin = startingX;
@@ -148,8 +163,12 @@ public class LSystem {
         divideLength();
     }
 
-    //todo stochastic L-systems
     private void drawLSystem() {
+        if (isStochastic) drawStochasticLSystem();
+        else drawDeterministicLSystem();
+    }
+
+    private void drawDeterministicLSystem() {
         for (int i = 0; i < lSystem.length(); i++) {
             switch (lSystem.charAt(i)) {
                 case 'F', 'G', 'X', 'Y' -> stepAndDrawLine();
@@ -162,8 +181,29 @@ public class LSystem {
         }
     }
 
+    private void drawStochasticLSystem() {
+        for (int i = 0; i < lSystem.length(); i++) {
+            switch (lSystem.charAt(i)) {
+                case 'F', 'G', 'X', 'Y' -> stepAndDrawLineRandom();
+                case 'f' -> step();
+                case '+' -> rotateLeftRandom(rotAngle);
+                case '-' -> rotateRightRandom(rotAngle);
+                case '[' -> saveState();
+                case ']' -> restoreState();
+            }
+        }
+    }
+
     //F
     private void stepAndDrawLine() {
+        step();
+        drawLine();
+    }
+
+    private void stepAndDrawLineRandom() {
+        Random rnd = new Random();
+        double rndLength = rnd.nextDouble(lengthDelta * 2) - lengthDelta;
+        length += length * rndLength;
         step();
         drawLine();
     }
@@ -188,9 +228,21 @@ public class LSystem {
         rotationManager.setAngle((rotationManager.getAngle() + angle));
     }
 
+    private void rotateLeftRandom(int angle) {
+        Random rnd = new Random();
+        int rndAngleBonus = rnd.nextInt(rotAngleDelta * 2) - rotAngleDelta;
+        rotationManager.setAngle((rotationManager.getAngle() + angle + rndAngleBonus));
+    }
+
     //-
     private void rotateRight(int angle) {
         rotationManager.setAngle((rotationManager.getAngle() - angle));
+    }
+
+    private void rotateRightRandom(int angle) {
+        Random rnd = new Random();
+        int rndAngleBonus = rnd.nextInt(rotAngleDelta * 2) - rotAngleDelta;
+        rotationManager.setAngle((rotationManager.getAngle() - angle - rndAngleBonus));
     }
 
     private void saveState() {
@@ -232,46 +284,6 @@ public class LSystem {
 
         glVertex2f(x1, y1);
         glVertex2f(x2, y2);
-
-        glEnd();
-    }
-
-    //Draws a bounds box based on x and y min and max coordinates. Used for debugging.
-    private void drawBoundsBox() {
-        glBegin(GL_LINES);
-        glColor3f(1f, 0f, 0f);
-
-        glVertex2f(xMin, yMin);
-        glVertex2f(xMax, yMin);
-
-        glVertex2f(xMin, yMin);
-        glVertex2f(xMin, yMax);
-
-        glVertex2f(xMin, yMax);
-        glVertex2f(xMax, yMax);
-
-        glVertex2f(xMax, yMax);
-        glVertex2f(xMax, yMin);
-
-        glEnd();
-    }
-
-    //for debugging
-    private void drawLineDebug() {
-        glBegin(GL_LINES);
-        glColor3f(0f, 0f, 1f);
-
-        glVertex2f(0.5f, 0.8f);
-        glVertex2f(0.7f, 0.8f);
-
-        glVertex2f(0.5f, 0.8f);
-        glVertex2f(0.5f, 0.6f);
-
-        glVertex2f(0.5f, 0.6f);
-        glVertex2f(0.7f, 0.6f);
-
-        glVertex2f(0.7f, 0.8f);
-        glVertex2f(0.7f, 0.6f);
 
         glEnd();
     }

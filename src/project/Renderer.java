@@ -16,7 +16,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
     private int genCount = 0;
-    private Generator generator = new QuadraticSnowflakeVariant();
+    private Generator generator = new HillbertCurve();
     private final List<Generator> generators =
             Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle());
     private int generatorIndex = 0;
@@ -56,31 +56,36 @@ public class Renderer extends AbstractRenderer {
                     switch (key) {
                         case GLFW_KEY_UP -> { // increment generation
                             if (genCount == generator.getMaxGen()) break;
+
                             glLoadIdentity();
                             lSystem = new LSystem();
                             genCount++;
+
                         }
                         case GLFW_KEY_DOWN -> { // decrement generation
                             if (genCount == 0) break;
+
                             glLoadIdentity();
                             lSystem = new LSystem();
                             genCount--;
+
                         }
                         case GLFW_KEY_RIGHT -> { //change generator type
                             glLoadIdentity();
                             lSystem = new LSystem();
                             setNextGenerator();
+
                         }
                         case GLFW_KEY_F -> { // test
-                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                            lSystem.run(3, new BetterTree());
+                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+                            lSystem.run(genCount, generator);
                         }
                         case GLFW_KEY_E -> { // test
                             glPushMatrix();
                             glScalef(0.9f, 0.9f, 0);
                         }
-                        case GLFW_KEY_L -> // Resets matrix
-                                glLoadIdentity();
+                        case GLFW_KEY_L -> glLoadIdentity(); // Resets matrix
+
                     }
                 }
             }
@@ -101,7 +106,7 @@ public class Renderer extends AbstractRenderer {
         } else {
             glViewport(0, 0, height, height);
         }
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         lSystem.run(genCount, generator);
     }
 

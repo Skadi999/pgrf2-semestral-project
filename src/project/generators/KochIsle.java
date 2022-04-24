@@ -16,6 +16,4 @@ public class KochIsle extends Generator {
                 5
         );
     }
-    //F+F+F+F
-    //F+F-F-FF+F+F-F
 }
