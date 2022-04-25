@@ -66,7 +66,6 @@ public class LSystem {
         //need to clear, reset (reinitialize) and redraw the L-system after scaling and repositioning it.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         initAndDraw(generationCount, generator);
-
     }
 
     private void initAndDraw(int generationCount, Generator generator) {

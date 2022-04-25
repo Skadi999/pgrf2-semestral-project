@@ -18,7 +18,7 @@ public class Renderer extends AbstractRenderer {
     private LSystem lSystem;
     private int genCount = 0;
     private Generator generator = new SimpleTree();
-    //a list of available generators, you can switch to the next generator with the right arrow key ->
+    //a list of available generators, you can switch the displayed generator using left and right arrow keys.
     private final List<Generator> generators =
             Arrays.asList(new SimpleTree(), new BetterTree(), new KochIsle(),
                     new Bush(), new HillbertCurve(), new QuadraticSnowflakeVariant(), new SierpinskiTriangle(),
@@ -85,6 +85,13 @@ public class Renderer extends AbstractRenderer {
 
                             isStop = false;
                         }
+                        case GLFW_KEY_LEFT -> { //change generator type to the previous one (in the "generators" variable)
+                            glLoadIdentity();
+                            lSystem = new LSystem();
+                            setPreviousGenerator();
+
+                            isStop = false;
+                        }
                         case GLFW_KEY_RIGHT -> { //change generator type to the next one (in the "generators" variable)
                             glLoadIdentity();
                             lSystem = new LSystem();
@@ -117,7 +124,10 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         lSystem.run(genCount, generator);
 
-        textRenderer.addStr2D(3, 20, "Vytvořeno v rámci předmětu PGRF2 na UHK. Autor: Vyacheslav Novak");
+        textRenderer.addStr2D(3, 20, "Semestrální Projekt L-Systémy: Vytvořeno v rámci předmětu PGRF2 na UHK. " +
+                "Autor: Vyacheslav Novak Poslední Úprava: 25.04.2022");
+        textRenderer.addStr2D(3, 780, "Nápověda: Left/Right Arrow: Předchozí/Další Generator. " +
+                "Up/Down Arrow: Inkrementace/Dekrementace Generace ");
 
     }
 
@@ -126,6 +136,16 @@ public class Renderer extends AbstractRenderer {
             generatorIndex = 0;
         } else {
             generatorIndex++;
+        }
+        generator = generators.get(generatorIndex);
+        genCount = 0;
+    }
+
+    private void setPreviousGenerator() {
+        if (generatorIndex == 0) {
+            generatorIndex = generators.size() - 1;
+        } else {
+            generatorIndex--;
         }
         generator = generators.get(generatorIndex);
         genCount = 0;
